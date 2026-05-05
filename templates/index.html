@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>RetailPredict — Sales Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════ */
+:root{
+  --ink:    #0D1B2A;
+  --ink2:   #3D5166;
+  --ink3:   #7B94A8;
+  --paper:  #F5F7FA;
+  --white:  #FFFFFF;
+  --border: #E2E8F0;
+  --border2:#C8D5E0;
+
+  --blue:   #1A56DB;
+  --blue-d: #1348C0;
+  --blue-l: #EBF2FF;
+  --blue-m: #BFDBFE;
+
+  --teal:   #0694A2;
+  --teal-l: #E6F7F8;
+
+  --green:  #057A55;
+  --green-l:#DEF7EC;
+  --green-m:#84E1BC;
+
+  --amber:  #C27803;
+  --amber-l:#FDF6B2;
+
+  --red:    #C81E1E;
+  --red-l:  #FDE8E8;
+
+  --purple: #7E3AF2;
+  --purple-l:#EDEBFE;
+
+  --shadow-sm: 0 1px 3px rgba(13,27,42,.06),0 1px 2px rgba(13,27,42,.04);
+  --shadow:    0 4px 16px rgba(13,27,42,.08),0 1px 4px rgba(13,27,42,.04);
+  --shadow-lg: 0 12px 40px rgba(13,27,42,.12),0 4px 12px rgba(13,27,42,.06);
+
+  --radius:  14px;
+  --radius-s: 9px;
+  --font: 'DM Sans',system-ui,sans-serif;
+  --mono: 'DM Mono',monospace;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  font-size:14px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════ */
+header{
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0 32px;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;top:0;z-index:200;
+  box-shadow:var(--shadow-sm);
+}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-mark{
+  width:34px;height:34px;
+  background:linear-gradient(135deg,var(--blue) 0%,var(--teal) 100%);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  box-shadow:0 2px 8px rgba(26,86,219,.3);
+}
+.brand-name{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.4px}
+.brand-tag{font-size:11px;color:var(--ink3);font-weight:400;margin-top:-1px}
+.header-pill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--blue-l);
+  border:1px solid var(--blue-m);
+  color:var(--blue-d);
+  font-size:11px;font-weight:600;
+  padding:5px 12px;border-radius:20px;
+  letter-spacing:.2px;
+}
+.hpill-dot{width:6px;height:6px;background:var(--blue);border-radius:50%;
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+
+/* ═══════════════════════════════════════════════════════
+   KPI STRIP
+═══════════════════════════════════════════════════════ */
+.kpi-strip{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  padding:20px 32px 0;
+}
+.kpi{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 20px;
+  box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;
+  transition:box-shadow .2s;
+}
+.kpi:hover{box-shadow:var(--shadow)}
+.kpi::after{
+  content:'';position:absolute;top:0;right:0;
+  width:3px;height:100%;
+  background:linear-gradient(180deg,var(--blue),var(--teal));
+  border-radius:0 var(--radius) var(--radius) 0;
+}
+.kpi.good::after{background:linear-gradient(180deg,var(--green),#34D399)}
+.kpi.warn::after{background:linear-gradient(180deg,var(--amber),#FBBF24)}
+.kpi-label{font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px}
+.kpi-value{font-size:26px;font-weight:700;color:var(--ink);margin:5px 0 2px;line-height:1;letter-spacing:-.5px}
+.kpi.good .kpi-value{color:var(--green)}
+.kpi-sub{font-size:11px;color:var(--ink3)}
+
+/* shimmer */
+@keyframes shim{0%{background-position:-600px 0}100%{background-position:600px 0}}
+.skel{
+  background:linear-gradient(90deg,#EDF2F7 25%,#F7FAFC 50%,#EDF2F7 75%);
+  background-size:600px 100%;
+  animation:shim 1.3s infinite;
+  border-radius:5px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════ */
+.main{padding:18px 32px 56px;display:flex;flex-direction:column;gap:18px}
+.row2{display:grid;grid-template-columns:400px 1fr;gap:18px;align-items:start}
+
+/* ═══════════════════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════════════════ */
+.card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+  transition:box-shadow .2s;
+}
+.card:hover{box-shadow:var(--shadow)}
+.card-head{
+  display:flex;align-items:center;gap:9px;
+  padding:14px 22px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,var(--white),#FAFBFD);
+}
+.card-head h2{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.card-head .ico{font-size:17px;line-height:1}
+.card-head .badge{
+  margin-left:auto;
+  font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:10px;
+  background:var(--blue-l);color:var(--blue-d);
+  letter-spacing:.2px;
+}
+.card-body{padding:22px}
+
+/* ═══════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════ */
+.tab-wrap{
+  display:flex;gap:4px;
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:10px;padding:4px;
+  margin-bottom:20px;
+}
+.tab{
+  flex:1;text-align:center;padding:8px 10px;
+  border-radius:7px;font-size:12px;font-weight:600;
+  cursor:pointer;color:var(--ink2);
+  transition:all .18s;user-select:none;
+  letter-spacing:.1px;
+}
+.tab.on{
+  background:var(--white);color:var(--blue);
+  box-shadow:0 1px 4px rgba(13,27,42,.08);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORM
+═══════════════════════════════════════════════════════ */
+.field{margin-bottom:13px}
+.field label{
+  display:block;font-size:11px;font-weight:600;
+  color:var(--ink2);text-transform:uppercase;letter-spacing:.6px;
+  margin-bottom:5px;
+}
+.field input[type=text],
+.field input[type=number],
+.field input[type=date],
+.field select{
+  width:100%;padding:9px 13px;
+  border:1.5px solid var(--border2);
+  border-radius:var(--radius-s);
+  font-size:14px;color:var(--ink);
+  background:var(--paper);
+  font-family:var(--font);
+  outline:none;
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--blue);
+  background:var(--white);
+  box-shadow:0 0 0 3px rgba(26,86,219,.1);
+}
+.field .hint{font-size:11px;color:var(--ink3);margin-top:3px}
+
+.gr2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.gr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+
+/* Toggle row */
+.toggle-row{display:flex;gap:10px;margin-bottom:13px}
+.tog{
+  flex:1;padding:9px 10px;
+  border:1.5px solid var(--border2);border-radius:var(--radius-s);
+  font-size:12px;font-weight:600;color:var(--ink2);
+  cursor:pointer;text-align:center;
+  background:var(--paper);
+  transition:all .15s;user-select:none;
+}
+.tog.on{background:var(--blue);color:var(--white);border-color:var(--blue);
+  box-shadow:0 2px 8px rgba(26,86,219,.25)}
+
+/* Slider */
+.slider-wrap{position:relative;padding-bottom:4px}
+.slider-wrap input[type=range]{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:5px;border-radius:3px;
+  background:linear-gradient(90deg,var(--blue) var(--p,24%),var(--border2) var(--p,24%));
+  outline:none;cursor:pointer;border:none;padding:0;
+}
+.slider-wrap input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--white);border:2px solid var(--blue);
+  box-shadow:0 1px 4px rgba(26,86,219,.3);cursor:pointer;
+}
+.slider-labels{display:flex;justify-content:space-between;
+  font-size:10px;color:var(--ink3);margin-top:2px}
+.slider-val{
+  display:inline-block;background:var(--blue-l);color:var(--blue-d);
+  font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;
+  margin-bottom:4px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTON
+═══════════════════════════════════════════════════════ */
+.btn{
+  width:100%;padding:11px 16px;
+  border:none;border-radius:var(--radius-s);
+  font-family:var(--font);font-size:14px;font-weight:700;
+  cursor:pointer;letter-spacing:.2px;
+  background:linear-gradient(135deg,var(--blue) 0%,var(--blue-d) 100%);
+  color:var(--white);
+  box-shadow:0 3px 12px rgba(26,86,219,.3);
+  transition:all .18s;
+  margin-top:4px;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(26,86,219,.38)}
+.btn:active{transform:none;box-shadow:0 2px 8px rgba(26,86,219,.2)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ═══════════════════════════════════════════════════════
+   RESULT BOX
+═══════════════════════════════════════════════════════ */
+#result-box{display:none;margin-top:16px}
+.result-card{
+  border-radius:var(--radius);overflow:hidden;
+  border:1.5px solid var(--green-m);
+  box-shadow:0 4px 20px rgba(5,122,85,.12);
+}
+.result-top{
+  background:linear-gradient(135deg,#ECFDF5 0%,#D1FAE5 100%);
+  padding:18px 20px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  flex-wrap:wrap;gap:12px;
+}
+.r-main .r-label{font-size:10px;font-weight:700;color:var(--green);
+  text-transform:uppercase;letter-spacing:.8px}
+.r-main .r-amount{
+  font-size:34px;font-weight:700;color:var(--green);
+  letter-spacing:-1px;line-height:1.1;margin-top:4px;
+}
+.r-main .r-date{font-size:11px;color:var(--ink2);margin-top:3px}
+.r-ci .ci-label{font-size:10px;font-weight:600;color:var(--ink2);text-align:right}
+.ci-chips{display:flex;gap:8px;margin-top:5px}
+.ci-chip{
+  background:rgba(255,255,255,.8);
+  border:1px solid var(--green-m);
+  border-radius:8px;padding:6px 10px;text-align:center;
+  backdrop-filter:blur(4px);
+}
+.ci-chip .cl{font-size:9px;font-weight:700;color:var(--ink3);text-transform:uppercase}
+.ci-chip .cv{font-size:13px;font-weight:700;color:var(--green)}
+
+.result-bar-section{
+  background:var(--white);padding:14px 20px;
+  border-top:1px solid #A7F3D0;
+}
+.rbar-track{height:7px;background:#D1FAE5;border-radius:4px;overflow:hidden}
+.rbar-fill{height:100%;
+  background:linear-gradient(90deg,#34D399,var(--green));
+  border-radius:4px;
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+}
+.rbar-end{display:flex;justify-content:space-between;
+  font-size:10px;color:var(--ink3);margin-top:3px}
+.r-badges{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.rbadge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px;
+}
+.rbadge.r2{background:var(--green-l);color:var(--green)}
+.rbadge.mape{background:var(--blue-l);color:var(--blue-d)}
+
+/* ═══════════════════════════════════════════════════════
+   ERROR
+═══════════════════════════════════════════════════════ */
+#error-box{
+  display:none;margin-top:12px;
+  background:var(--red-l);border:1.5px solid #FCA5A5;
+  border-radius:var(--radius-s);padding:11px 14px;
+  font-size:13px;color:var(--red);
+  gap:8px;align-items:flex-start;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORECAST BARS
+═══════════════════════════════════════════════════════ */
+#fc-section{display:none;margin-top:16px}
+.fc-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.fc-title{font-size:12px;font-weight:700;color:var(--ink)}
+.fc-meta{font-size:11px;color:var(--ink3)}
+.fc-bars{
+  display:flex;gap:4px;align-items:flex-end;
+  height:110px;
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:var(--radius-s);
+  padding:10px 8px 7px;
+}
+.fbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  height:100%;justify-content:flex-end}
+.fbv{font-size:8px;color:var(--ink2);font-weight:600;white-space:nowrap}
+.fb{
+  width:100%;min-height:3px;
+  background:linear-gradient(180deg,#60A5FA,var(--blue));
+  border-radius:3px 3px 0 0;
+  transition:height .5s ease;
+}
+.fb.peak{background:linear-gradient(180deg,#FCD34D,var(--amber))}
+.fb.holiday{background:linear-gradient(180deg,#F87171,var(--red))}
+.fbl{font-size:8px;color:var(--ink3);white-space:nowrap}
+
+/* ═══════════════════════════════════════════════════════
+   CHART SECTION
+═══════════════════════════════════════════════════════ */
+.chart-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.ct{
+  padding:5px 13px;border-radius:20px;
+  font-size:12px;font-weight:600;
+  cursor:pointer;
+  border:1.5px solid var(--border2);
+  background:var(--paper);color:var(--ink2);
+  transition:all .15s;user-select:none;
+}
+.ct.on{
+  background:var(--blue);color:var(--white);
+  border-color:var(--blue);
+  box-shadow:0 2px 8px rgba(26,86,219,.25);
+}
+#chart-loader{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:56px;color:var(--ink3);font-size:13px;
+}
+.chart-img{width:100%;border-radius:var(--radius-s);display:none;
+  border:1px solid var(--border)}
+.chart-img.on{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.chart-desc{
+  margin-top:10px;font-size:12px;color:var(--ink2);line-height:1.65;
+  background:var(--paper);border:1px solid var(--border);
+  border-radius:var(--radius-s);padding:10px 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SUGGESTIONS
+═══════════════════════════════════════════════════════ */
+.sg-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(255px,1fr));
+  gap:12px;
+}
+.sg{
+  border-radius:var(--radius-s);padding:14px 16px;
+  display:flex;gap:11px;align-items:flex-start;
+  border:1px solid var(--border);
+  background:var(--white);
+  transition:box-shadow .18s,transform .18s;
+}
+.sg:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.sg.tip  {border-left:3px solid var(--blue)}
+.sg.good {border-left:3px solid var(--green)}
+.sg.warn {border-left:3px solid var(--amber)}
+.sg.info {border-left:3px solid var(--purple)}
+.sg.alert{border-left:3px solid var(--red)}
+.sg .si{font-size:20px;flex-shrink:0;margin-top:1px;line-height:1}
+.sg .st{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.sg .sd{font-size:12px;color:var(--ink2);line-height:1.55}
+
+/* ═══════════════════════════════════════════════════════
+   SPINNER
+═══════════════════════════════════════════════════════ */
+.spin{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:var(--white);
+  border-radius:50%;
+  animation:rot .6s linear infinite;
+  vertical-align:middle;margin-right:6px;
+}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════════════════════════════════════
+   SECTION HEADER
+═══════════════════════════════════════════════════════ */
+.section-intro{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.7px;
+  padding:0 2px;
+}
+.section-intro::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════════════════ */
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media(max-width:900px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .kpi:last-child{grid-column:1/-1}
+  .row2{grid-template-columns:1fr}
+  header,.kpi-strip,.main{padding-left:16px;padding-right:16px}
+}
+@media(max-width:480px){
+  .kpi-strip{grid-template-columns:1fr 1fr}
+  .gr2,.gr3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER ══════════════════════════ -->
+<header>
+  <div class="brand">
+    <div class="brand-mark">📦</div>
+    <div>
+      <div class="brand-name">RetailPredict</div>
+      <div class="brand-tag">AI-Powered Sales Intelligence</div>
+    </div>
+  </div>
+  <div class="header-pill">
+    <span class="hpill-dot"></span>
+    <span id="hdr-text">Loading model…</span>
+  </div>
+</header>
+
+<!-- ═══════════════════ KPI STRIP ══════════════════════ -->
+<div class="kpi-strip">
+  <div class="kpi good">
+    <div class="kpi-label">R² Score</div>
+    <div class="kpi-value" id="k-r2"><div class="skel" style="width:72px;height:26px"></div></div>
+    <div class="kpi-sub">Model Fit Quality</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Train R²</div>
+    <div class="kpi-value" id="k-tr2"><div class="skel" style="width:64px;height:26px"></div></div>
+    <div class="kpi-sub">Training Fit</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">MAE</div>
+    <div class="kpi-value" style="font-size:19px" id="k-mae"><div class="skel" style="width:90px;height:20px"></div></div>
+    <div class="kpi-sub">Mean Absolute Error</div>
+  </div>
+  <div class="kpi warn">
+    <div class="kpi-label">MAPE</div>
+    <div class="kpi-value" id="k-mape"><div class="skel" style="width:60px;height:26px"></div></div>
+    <div class="kpi-sub">Mean Abs. % Error</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">CV R² Mean</div>
+    <div class="kpi-value" id="k-cv"><div class="skel" style="width:72px;height:26px"></div></div>
+    <div class="kpi-sub" id="k-cv-sub">5-Fold TimeSeriesSplit</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MAIN ══════════════════════════ -->
+<div class="main">
+<div class="row2">
+
+  <!-- ── LEFT: Input ───────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <span class="ico">🎯</span>
+      <h2>Sales Prediction</h2>
+      <span class="badge" id="input-badge">Ridge · 40 features</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Mode tabs -->
+      <div class="tab-wrap">
+        <div class="tab on" data-tab="single" onclick="switchTab('single')">📅 Single Date</div>
+        <div class="tab" data-tab="forecast" onclick="switchTab('forecast')">📈 Multi-Day Forecast</div>
+      </div>
+
+      <!-- ───── SINGLE DATE FORM ───── -->
+      <div id="form-single">
+        <div class="field">
+          <label>Prediction Date</label>
+          <input type="date" id="pred-date"/>
+        </div>
+
+        <div class="section-intro">Revenue History (Lag Features)</div>
+        <div style="margin-top:12px"></div>
+
+        <div class="gr3">
+          <div class="field">
+            <label>7 Days Ago (₹)</label>
+            <input type="number" id="lag7" placeholder="e.g. 3200000" min="0" step="1000"/>
+          </div>
+          <div class="field">
+            <label>14 Days Ago (₹)</label>
+            <input type="number" id="lag14" placeholder="e.g. 2900000" min="0" step="1000"/>
+          </div>
+          <div class="field">
+            <label>28 Days Ago (₹)</label>
+            <input type="number" id="lag28" placeholder="e.g. 2800000" min="0" step="1000"/>
+          </div>
+        </div>
+
+        <div class="section-intro" style="margin-top:4px">Business Context</div>
+        <div style="margin-top:12px"></div>
+
+        <div class="field">
+          <label>Promotion Intensity — <span class="slider-val" id="promo-lbl">24%</span></label>
+          <div class="slider-wrap">
+            <input type="range" id="promo-slider" min="0" max="100" value="24"
+              oninput="updateSlider(this,'promo-lbl','%')"/>
+            <div class="slider-labels"><span>No Promo</span><span>Full Promo</span></div>
+          </div>
+          <div class="hint">% of product-store pairs running promotions that day</div>
+        </div>
+
+        <div class="toggle-row">
+          <div class="tog" id="tog-holiday-0" onclick="setToggle('holiday',0)">📅 Regular Day</div>
+          <div class="tog on" id="tog-holiday-1" onclick="setToggle('holiday',1)" style="display:none">🎉 Holiday</div>
+        </div>
+        <!-- hidden holiday toggle -->
+        <div class="toggle-row" style="margin-bottom:13px">
+          <div class="tog on" id="tholiday-0" onclick="setHoliday(0)">📅 Regular Day</div>
+          <div class="tog" id="tholiday-1" onclick="setHoliday(1)">🎉 Holiday</div>
+        </div>
+        <div class="field">
+          <label>Expected Total Units Sold</label>
+          <input type="number" id="units-input" placeholder="e.g. 2700" min="1" step="50"/>
+          <div class="hint">All products × all stores combined</div>
+        </div>
+
+        <button class="btn" id="predict-btn" onclick="doPred()">🔍 Predict Revenue</button>
+      </div>
+
+      <!-- ───── FORECAST FORM ───── -->
+      <div id="form-forecast" style="display:none">
+        <div class="field">
+          <label>Forecast Start Date</label>
+          <input type="date" id="fc-date"/>
+        </div>
+        <div class="gr2">
+          <div class="field">
+            <label>Days to Forecast</label>
+            <input type="number" id="fc-days" value="14" min="1" max="90"/>
+          </div>
+          <div class="field">
+            <label>Baseline Revenue (₹)</label>
+            <input type="number" id="fc-base" placeholder="e.g. 3000000" min="0" step="10000"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Avg Promotion Intensity — <span class="slider-val" id="fc-promo-lbl">20%</span></label>
+          <div class="slider-wrap">
+            <input type="range" id="fc-promo-slider" min="0" max="100" value="20"
+              oninput="updateSlider(this,'fc-promo-lbl','%')"/>
+            <div class="slider-labels"><span>No Promo</span><span>Full Promo</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Avg Daily Units Sold</label>
+          <input type="number" id="fc-units" value="2700" min="1" step="100"/>
+        </div>
+        <div class="hint" style="margin-bottom:14px">Forecasts up to 90 days. Re-run weekly with fresh actuals for best accuracy.</div>
+        <button class="btn" id="fc-btn" onclick="doForecast()">📈 Generate Forecast</button>
+      </div>
+
+      <!-- ───── RESULT BOX ───── -->
+      <div id="result-box">
+        <div class="result-card">
+          <div class="result-top">
+            <div class="r-main">
+              <div class="r-label">Predicted Daily Revenue</div>
+              <div class="r-amount">₹<span id="r-val">—</span></div>
+              <div class="r-date"><span id="r-date">—</span></div>
+            </div>
+            <div class="r-ci">
+              <div class="ci-label">95% Confidence Interval</div>
+              <div class="ci-chips">
+                <div class="ci-chip">
+                  <div class="cl">Lower</div>
+                  <div class="cv">₹<span id="r-lo">—</span></div>
+                </div>
+                <div class="ci-chip">
+                  <div class="cl">Upper</div>
+                  <div class="cv">₹<span id="r-hi">—</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="result-bar-section">
+            <div class="rbar-track"><div class="rbar-fill" id="rbar" style="width:0%"></div></div>
+            <div class="rbar-end"><span>₹0</span><span id="rbar-max">—</span></div>
+            <div class="r-badges">
+              <span class="rbadge r2">✅ R² <span id="b-r2">—</span></span>
+              <span class="rbadge mape">MAPE <span id="b-mape">—</span>%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── ERROR BOX ───── -->
+      <div id="error-box" style="display:none">
+        <span>⚠️</span><span id="err-txt">Error</span>
+      </div>
+
+      <!-- ───── FORECAST BARS ───── -->
+      <div id="fc-section">
+        <div class="fc-hdr">
+          <span class="fc-title">📅 Forecast Overview</span>
+          <span class="fc-meta" id="fc-meta"></span>
+        </div>
+        <div class="fc-bars" id="fc-bars"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Charts ─────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <span class="ico">📊</span>
+      <h2>Model Graphical Insights</h2>
+      <span class="badge">Training Data · 702 days</span>
+    </div>
+    <div class="card-body">
+      <div class="chart-tabs">
+        <div class="ct on" data-c="actual_vs_pred"      onclick="showChart('actual_vs_pred',this)">Actual vs Predicted</div>
+        <div class="ct"    data-c="residuals"           onclick="showChart('residuals',this)">Residuals</div>
+        <div class="ct"    data-c="feature_importance"  onclick="showChart('feature_importance',this)">Feature Importance</div>
+        <div class="ct"    data-c="monthly_seasonality" onclick="showChart('monthly_seasonality',this)">Seasonality</div>
+        <div class="ct"    data-c="promo_holiday"       onclick="showChart('promo_holiday',this)">Promo & Holiday</div>
+        <div class="ct"    data-c="distribution"        onclick="showChart('distribution',this)">Distribution</div>
+      </div>
+
+      <div id="chart-loader">
+        <div class="spin" style="border-color:rgba(26,86,219,.2);border-top-color:var(--blue)"></div>
+        Loading model charts…
+      </div>
+      <img class="chart-img" id="ci-actual_vs_pred"      alt="Actual vs Predicted"/>
+      <img class="chart-img" id="ci-residuals"           alt="Residuals"/>
+      <img class="chart-img" id="ci-feature_importance"  alt="Feature Importance"/>
+      <img class="chart-img" id="ci-monthly_seasonality" alt="Monthly Seasonality"/>
+      <img class="chart-img" id="ci-promo_holiday"       alt="Promo & Holiday"/>
+      <img class="chart-img" id="ci-distribution"        alt="Distribution"/>
+      <div class="chart-desc" id="chart-desc" style="display:none"></div>
+    </div>
+  </div>
+
+</div><!-- /row2 -->
+
+<!-- ═══════════════════ SUGGESTIONS ═════════════════ -->
+<div class="card" id="sg-panel" style="display:none">
+  <div class="card-head">
+    <span class="ico">💡</span>
+    <h2>Smart Business Suggestions</h2>
+    <span class="badge" id="sg-badge">Based on prediction</span>
+  </div>
+  <div class="card-body">
+    <div class="sg-grid" id="sg-list"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════ -->
+<script>
+/* ── State ── */
+let INFO = null;
+let holidayVal = 0;
+
+const CHART_DESCS = {
+  actual_vs_pred:
+    'Blue = actual daily revenue across the full dataset, red dashed = model predictions on the held-out 20% test set. The close alignment confirms the model generalises well beyond training data.',
+  residuals:
+    'Left: residual errors (actual − predicted) vs predicted values — random scatter around zero is ideal and confirms no systematic bias. Right: residual histogram showing near-normal distribution, validating model assumptions.',
+  feature_importance:
+    'Absolute Ridge regression coefficients after standardisation. Blue = lag/rolling revenue features (dominant — sales autocorrelation is strong). Green = promotion/holiday flags. Orange = temporal features.',
+  monthly_seasonality:
+    'Average daily revenue aggregated by calendar month. Strong peaks in Oct–Dec reveal the festive season effect. Use this to plan inventory build-up and promotional budgets ahead of seasonal spikes.',
+  promo_holiday:
+    'Left: promotion intensity (% of stores running promos) vs average revenue — higher intensity clearly lifts revenue. Right: regular day vs holiday average — holidays drive a significant revenue premium.',
+  distribution:
+    'Histogram of all 702 daily revenue observations. The red dashed line marks the mean. The slight right-skew is typical of retail data; the model handles this well without transformation.',
+};
+
+/* ── Init ── */
+window.onload = async () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('pred-date').value = today;
+  document.getElementById('fc-date').value   = today;
+  initSliders();
+  await fetchInfo();
+  await fetchCharts();
+};
+
+function initSliders() {
+  ['promo-slider','fc-promo-slider'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.setProperty('--p', el.value + '%');
+  });
+}
+
+function updateSlider(el, lblId, suffix) {
+  const v = el.value;
+  el.style.setProperty('--p', v + '%');
+  document.getElementById(lblId).textContent = v + suffix;
+}
+
+/* ── Model info ── */
+async function fetchInfo() {
+  try {
+    INFO = await (await fetch('/model_info')).json();
+    if (INFO.error) return;
+    const fmt = v => '₹' + Number(v).toLocaleString('en-IN', {maximumFractionDigits:0});
+    document.getElementById('k-r2').textContent   = INFO.r2;
+    document.getElementById('k-tr2').textContent  = INFO.train_r2;
+    document.getElementById('k-mae').textContent  = fmt(INFO.mae);
+    document.getElementById('k-mape').textContent = INFO.mape + '%';
+    document.getElementById('k-cv').textContent   = INFO.cv_r2_mean;
+    document.getElementById('k-cv-sub').textContent =
+      `±${INFO.cv_r2_std}  ·  5-Fold TS`;
+    document.getElementById('b-r2').textContent   = INFO.r2;
+    document.getElementById('b-mape').textContent = INFO.mape;
+    document.getElementById('input-badge').textContent =
+      `Ridge · ${INFO.n_features} features`;
+    document.getElementById('hdr-text').textContent =
+      `Live · R² ${INFO.r2} · MAPE ${INFO.mape}%`;
+
+    // Seed lag placeholders with realistic values
+    const m = Math.round(INFO.revenue_mean);
+    ['lag7','lag14','lag28'].forEach(id => {
+      document.getElementById(id).placeholder = `e.g. ${m.toLocaleString('en-IN')}`;
+    });
+    document.getElementById('fc-base').placeholder =
+      `e.g. ${m.toLocaleString('en-IN')}`;
+  } catch(e) {
+    document.getElementById('hdr-text').textContent = 'Model ready';
+  }
+}
+
+/* ── Charts ── */
+async function fetchCharts() {
+  try {
+    const d = await (await fetch('/charts')).json();
+    document.getElementById('chart-loader').style.display = 'none';
+    for (const [k, b64] of Object.entries(d)) {
+      const el = document.getElementById('ci-' + k);
+      if (el) el.src = 'data:image/png;base64,' + b64;
+    }
+    showChart('actual_vs_pred', document.querySelector('.ct.on'));
+  } catch(e) {
+    document.getElementById('chart-loader').innerHTML =
+      '⚠️ Charts failed — ensure model is trained.';
+  }
+}
+
+function showChart(name, el) {
+  document.querySelectorAll('.chart-img').forEach(i => i.classList.remove('on'));
+  document.querySelectorAll('.ct').forEach(t => t.classList.remove('on'));
+  const img = document.getElementById('ci-' + name);
+  if (img) img.classList.add('on');
+  if (el)  el.classList.add('on');
+  const desc = document.getElementById('chart-desc');
+  if (CHART_DESCS[name]) {
+    desc.textContent = CHART_DESCS[name];
+    desc.style.display = 'block';
+  } else {
+    desc.style.display = 'none';
+  }
+}
+
+/* ── Tabs ── */
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('on');
+  document.getElementById('form-single').style.display   = tab === 'single'   ? '' : 'none';
+  document.getElementById('form-forecast').style.display = tab === 'forecast' ? '' : 'none';
+  clearOutputs();
+}
+
+function clearOutputs() {
+  ['result-box','error-box','fc-section'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('sg-panel').style.display = 'none';
+}
+
+/* ── Holiday toggle ── */
+function setHoliday(v) {
+  holidayVal = v;
+  document.getElementById('tholiday-0').classList.toggle('on', v === 0);
+  document.getElementById('tholiday-1').classList.toggle('on', v === 1);
+}
+
+/* ── Loading state ── */
+function setLoading(id, on) {
+  const b = document.getElementById(id);
+  const labels = {
+    'predict-btn': ['🔍 Predict Revenue',    'Predicting…'],
+    'fc-btn':      ['📈 Generate Forecast',  'Generating…'],
+  };
+  b.disabled = on;
+  b.innerHTML = on
+    ? `<span class="spin"></span>${labels[id][1]}`
+    : labels[id][0];
+}
+
+/* ── Number helpers ── */
+const fmtCr  = v => '₹' + (v/1e7).toFixed(2) + ' Cr';
+const fmtLk  = v => '₹' + (v/1e5).toFixed(1) + 'L';
+const fmtAmt = v => {
+  if (v >= 1e7) return fmtCr(v);
+  if (v >= 1e5) return fmtLk(v);
+  return '₹' + Number(v).toLocaleString('en-IN', {maximumFractionDigits:0});
+};
+const fmtShort = v => {
+  if (v >= 1e6) return (v/1e6).toFixed(2)+'M';
+  if (v >= 1e3) return (v/1e3).toFixed(1)+'k';
+  return Math.round(v).toString();
+};
+const fmtDate  = s => {
+  const d = new Date(s + 'T12:00:00');
+  return d.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+};
+
+/* ── SINGLE PREDICTION ── */
+async function doPred() {
+  const date = document.getElementById('pred-date').value;
+  if (!date) { showErr('Please select a prediction date.'); return; }
+
+  const lag7  = parseFloat(document.getElementById('lag7').value)  || (INFO?.revenue_mean ?? 3e6);
+  const lag14 = parseFloat(document.getElementById('lag14').value) || lag7;
+  const lag28 = parseFloat(document.getElementById('lag28').value) || lag7;
+  const promo = parseFloat(document.getElementById('promo-slider').value) / 100;
+  const units = parseFloat(document.getElementById('units-input').value) || 2700;
+
+  clearOutputs();
+  setLoading('predict-btn', true);
+
+  try {
+    const res = await fetch('/predict', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        date, promotion: promo, holiday: holidayVal,
+        units_sold: units, lag_7: lag7, lag_14: lag14, lag_28: lag28,
+      })
+    });
+    const d = await res.json();
+    if (d.error) { showErr(d.error); return; }
+
+    // Populate result card
+    document.getElementById('r-val').textContent  = fmtAmt(d.prediction).replace('₹','');
+    document.getElementById('r-date').textContent = fmtDate(d.date);
+    document.getElementById('r-lo').textContent   = fmtAmt(d.lower_ci).replace('₹','');
+    document.getElementById('r-hi').textContent   = fmtAmt(d.upper_ci).replace('₹','');
+
+    const maxRef = d.upper_ci * 1.2;
+    const pct    = Math.min(92, Math.max(5, (d.prediction / maxRef) * 100));
+    document.getElementById('rbar').style.width = pct + '%';
+    document.getElementById('rbar-max').textContent = fmtAmt(maxRef);
+
+    document.getElementById('result-box').style.display = 'block';
+    buildSuggestions(d, promo, holidayVal, date);
+
+  } catch(e) { showErr('Network error: ' + e.message); }
+  finally { setLoading('predict-btn', false); }
+}
+
+/* ── FORECAST ── */
+async function doForecast() {
+  const start = document.getElementById('fc-date').value;
+  const days  = parseInt(document.getElementById('fc-days').value) || 14;
+  const base  = parseFloat(document.getElementById('fc-base').value) || (INFO?.revenue_mean ?? 3e6);
+  const promo = parseFloat(document.getElementById('fc-promo-slider').value) / 100;
+  const units = parseFloat(document.getElementById('fc-units').value) || 2700;
+
+  if (!start) { showErr('Please select a start date.'); return; }
+
+  clearOutputs();
+  setLoading('fc-btn', true);
+
+  try {
+    const res = await fetch('/forecast', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        start_date: start, days, promotion: promo,
+        base_revenue: base, base_units: units,
+      })
+    });
+    const d = await res.json();
+    if (d.error) { showErr(d.error); return; }
+
+    renderFcBars(d.dates, d.forecasts);
+    document.getElementById('fc-section').style.display = 'block';
+    buildFcSuggestions(d.forecasts, d.dates, promo);
+  } catch(e) { showErr('Network error: ' + e.message); }
+  finally { setLoading('fc-btn', false); }
+}
+
+function renderFcBars(dates, vals) {
+  const maxV  = Math.max(...vals);
+  const avg   = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const piIdx = vals.indexOf(maxV);
+  const show  = vals.slice(0, 21);
+
+  document.getElementById('fc-meta').textContent =
+    `Avg ${fmtAmt(avg)}  ·  Peak ${fmtAmt(maxV)} on ${dates[piIdx]?.slice(5)}`;
+
+  document.getElementById('fc-bars').innerHTML = show.map((v,i) => {
+    const h  = Math.max(3, Math.round((v/maxV)*88));
+    const cls = v === maxV ? 'peak' : '';
+    return `<div class="fbw">
+      <div class="fbv">${fmtShort(v)}</div>
+      <div class="fb ${cls}" style="height:${h}px"></div>
+      <div class="fbl">${dates[i]?.slice(5)||''}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── SUGGESTIONS ── */
+function buildSuggestions(pred_data, promo, holiday, dateStr) {
+  const p   = pred_data.prediction;
+  const ci  = pred_data.upper_ci - pred_data.lower_ci;
+  const dt  = new Date(dateStr + 'T12:00:00');
+  const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+  const mo  = dt.getMonth() + 1;
+  const sugs = [];
+
+  // Revenue level
+  const mean = INFO?.revenue_mean ?? 3e6;
+  if (p > mean * 1.3)
+    sugs.push({t:'good',i:'🚀',h:'High-Revenue Day Forecasted',
+      d:`${fmtAmt(p)} expected — ${((p/mean-1)*100).toFixed(0)}% above average. Pre-stock fast-movers, maximise checkout capacity, activate upsell banners.`});
+  else if (p < mean * 0.75)
+    sugs.push({t:'warn',i:'📉',h:'Below-Average Revenue Day',
+      d:`${fmtAmt(p)} projected — ${((1-p/mean)*100).toFixed(0)}% below average. Schedule flash offers, loyalty bonus points, or bundle deals to lift conversion.`});
+  else
+    sugs.push({t:'tip',i:'📊',h:'Typical Trading Day',
+      d:`${fmtAmt(p)} — near average. Maintain standard staffing and inventory. A good day for planogram refreshes or staff training.`});
+
+  // Promo
+  if (promo > 0.4)
+    sugs.push({t:'good',i:'🏷️',h:'High Promotion Day',
+      d:`${Math.round(promo*100)}% of stores running promos. Expect elevated traffic — ensure adequate stock of promoted SKUs and monitor sell-through in real time.`});
+  else if (promo < 0.1)
+    sugs.push({t:'info',i:'📋',h:'Low Promotion Activity',
+      d:`Only ${Math.round(promo*100)}% promo coverage. Consider activating targeted digital coupons or loyalty discounts to drive incremental visits.`});
+
+  // Holiday
+  if (holiday)
+    sugs.push({t:'good',i:'🎉',h:'Holiday Revenue Premium',
+      d:'Holidays historically drive 25-45% higher footfall. Extended store hours, event-based merchandise placement, and gift bundles can capture this uplift.'});
+
+  // Weekend
+  if (['Sat','Sun'].includes(dow))
+    sugs.push({t:'tip',i:'🛍️',h:'Weekend Footfall Boost',
+      d:'Weekends see 15-25% higher traffic. Ensure visible promotional signage, demo stations, and enough floor staff at peak hours (11am–2pm, 5pm–8pm).'});
+  else if (dow === 'Mon')
+    sugs.push({t:'info',i:'📦',h:'Monday Restock Window',
+      d:'Review weekend depletion early and trigger purchase orders for fast-moving SKUs before the mid-week demand window opens.'});
+
+  // Seasonality
+  if ([10,11,12].includes(mo))
+    sugs.push({t:'good',i:'🎄',h:'Festive Season — Peak Quarter',
+      d:'Q4 drives 30-40% of annual retail revenue in India. Begin vendor negotiations, demand-plan 6 weeks ahead, and run pre-festive loyalty campaigns now.'});
+  else if ([1,2].includes(mo))
+    sugs.push({t:'warn',i:'❄️',h:'Post-Holiday Slowdown',
+      d:'Jan–Feb typically dips post-festive. Clear festive inventory with end-of-season sales and activate year-start subscription/loyalty offers.'});
+
+  // CI
+  if (ci > p * 0.35)
+    sugs.push({t:'warn',i:'⚠️',h:'Wide Confidence Interval',
+      d:`CI of ${fmtAmt(ci)} is relatively broad. Adding weather, competitor events, or product-mix features would tighten this range.`});
+
+  // Accuracy reminder
+  sugs.push({t:'info',i:'🧠',h:'Model Accuracy',
+    d:`Test R² ${INFO?.r2 ?? '–'} · MAPE ${INFO?.mape ?? '–'}%. Retrain monthly with fresh actuals. Add holiday calendars and marketing spend as features to push R² above 0.96.`});
+
+  renderSuggestions(sugs, 'Based on your prediction');
+}
+
+function buildFcSuggestions(vals, dates, promo) {
+  const avg  = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const maxV = Math.max(...vals), minV = Math.min(...vals);
+  const maxI = vals.indexOf(maxV), minI = vals.indexOf(minV);
+  const sugs = [
+    {t:'good',i:'📈',h:`${vals.length}-Day Forecast Summary`,
+      d:`Avg ${fmtAmt(avg)} · Peak ${fmtAmt(maxV)} on ${dates[maxI]?.slice(5)} · Low ${fmtAmt(minV)} on ${dates[minI]?.slice(5)}.`},
+    {t:'tip',i:'🏆',h:`Stock Up Before Peak (${dates[maxI]?.slice(5)})`,
+      d:`Highest forecast: ${fmtAmt(maxV)}. Place purchase orders 2–3 days prior; allow 1 day for logistics and shelf-stocking.`},
+    {t:'warn',i:'📉',h:`Promote on Slow Day (${dates[minI]?.slice(5)})`,
+      d:`Lowest forecast: ${fmtAmt(minV)}. Schedule targeted campaigns, double loyalty points, or clearance sales to boost this day.`},
+    {t:'info',i:'🔄',h:'Forecast Refresh Cadence',
+      d:'Lag-based models accumulate drift beyond 14 days. Update with daily actuals and re-run the forecast at least weekly.'},
+    {t:'tip',i:'💡',h:'Scenario Planning',
+      d:'Run three forecasts: optimistic (high promo), base-case, and pessimistic (no promo). Use the range to set inventory min/max bounds.'},
+    {t:'info',i:'🧠',h:'Improve Further',
+      d:'Add store-wise breakdowns, SKU-level data, and weather features to get store-specific forecasts with R² > 0.96.'},
+  ];
+  renderSuggestions(sugs, 'Based on your forecast');
+}
+
+function renderSuggestions(sugs, badgeText) {
+  document.getElementById('sg-list').innerHTML = sugs.map(s =>
+    `<div class="sg ${s.t}">
+      <div class="si">${s.i}</div>
+      <div><div class="st">${s.h}</div><div class="sd">${s.d}</div></div>
+    </div>`).join('');
+  const p = document.getElementById('sg-panel');
+  document.getElementById('sg-badge').textContent = badgeText || '';
+  p.style.display = 'block';
+  setTimeout(() => p.scrollIntoView({behavior:'smooth', block:'nearest'}), 150);
+}
+
+function showErr(msg) {
+  const b = document.getElementById('error-box');
+  document.getElementById('err-txt').textContent = msg;
+  b.style.display = 'flex';
+}
+</script>
+</body>
+</html>
